@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/rss")
 public class RssController {
 
-    private final RssService rssService;
+    private final RssServiceImpl rssService;
 
-    public RssController(RssService rssService) {
+    public RssController(RssServiceImpl rssService) {
         this.rssService = rssService;
     }
 

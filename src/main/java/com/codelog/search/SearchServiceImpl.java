@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class SearchServiceImpl implements SearchService {
+public class SearchServiceImpl {
 
     private final PostRepository postRepository;
 
@@ -17,13 +17,17 @@ public class SearchServiceImpl implements SearchService {
         this.postRepository = postRepository;
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<Post> searchPosts(String query) {
+        // Burada arama kelimesi bos mu diye kontrol ediyoruz.
         if (query == null || query.trim().isEmpty()) {
             return Collections.emptyList();
         }
+
+        // Kullanici bastaki/sondaki bosluklari yazmis olabilir.
         String normalizedQuery = query.trim();
+
+        // Baslikta veya icerikte gecen yazilari getiriyoruz.
         return postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
                 normalizedQuery, normalizedQuery
         );

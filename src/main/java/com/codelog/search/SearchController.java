@@ -13,9 +13,9 @@ import java.util.List;
 @RequestMapping("/api")
 public class SearchController {
 
-    private final SearchService searchService;
+    private final SearchServiceImpl searchService;
 
-    public SearchController(SearchService searchService) {
+    public SearchController(SearchServiceImpl searchService) {
         this.searchService = searchService;
     }
 

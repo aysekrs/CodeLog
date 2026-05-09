@@ -1,39 +1,44 @@
 import React, { useState } from "react";
 
 const SearchBar = ({ onResults, onClear }) => {
-  const [query, setQuery] = useState("");
-  const [warning, setWarning] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [aramaMetni, setAramaMetni] = useState("");
+  const [uyariMesaji, setUyariMesaji] = useState("");
+  const [aramaYapiliyor, setAramaYapiliyor] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const normalized = query.trim();
+    const normalizeArama = aramaMetni.trim();
 
-    if (!normalized) {
-      setWarning("Arama kelimesi girmelisiniz.");
+    // Kullanici hicbir sey yazmadan arama yaparsa uyari veriyoruz.
+    if (!normalizeArama) {
+      setUyariMesaji("Arama kelimesi girmeden arama yapamazsın.");
       onClear?.();
       return;
     }
 
-    setLoading(true);
-    setWarning("");
+    setAramaYapiliyor(true);
+    setUyariMesaji("");
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(normalized)}`);
+      // Burada arama islemi yapiliyor.
+      const response = await fetch(`/api/search?q=${encodeURIComponent(normalizeArama)}`);
       if (!response.ok) {
-        throw new Error("Arama sırasında bir hata oluştu.");
+        throw new Error("Arama sırasında bir problem oldu, tekrar dener misin?");
       }
 
       const data = await response.json();
       onResults?.(data);
 
+      // Sonuc yoksa ogrenci dostu bir uyari gosteriyoruz.
       if (!Array.isArray(data) || data.length === 0) {
-        setWarning("Aradığınız kritere uygun yazı bulunamadı.");
+        setUyariMesaji("Aradığın kritere uygun yazı bulunamadı.");
+      } else {
+        setUyariMesaji("");
       }
     } catch (err) {
-      setWarning(err.message || "Arama sırasında bir hata oluştu.");
+      setUyariMesaji(err.message || "Arama sırasında beklenmedik bir hata oluştu.");
       onResults?.([]);
     } finally {
-      setLoading(false);
+      setAramaYapiliyor(false);
     }
   };
 
@@ -43,26 +48,26 @@ const SearchBar = ({ onResults, onClear }) => {
         <input
           type="text"
           placeholder="Başlık veya içerikte ara..."
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          value={aramaMetni}
+          onChange={(event) => setAramaMetni(event.target.value)}
           style={{ width: "70%", padding: "8px" }}
         />
-        <button type="submit" disabled={loading} style={{ marginLeft: "8px", padding: "8px 12px" }}>
-          {loading ? "Aranıyor..." : "Ara"}
+        <button type="submit" disabled={aramaYapiliyor} style={{ marginLeft: "8px", padding: "8px 12px" }}>
+          {aramaYapiliyor ? "Aranıyor..." : "Ara"}
         </button>
         <button
           type="button"
           onClick={() => {
-            setQuery("");
-            setWarning("");
+            setAramaMetni("");
+            setUyariMesaji("");
             onClear?.();
           }}
-          style={{ marginLeft: "8px", padding: "8px 12px" }}
+          style={{ marginLeft: "7px", padding: "8px 12px" }}
         >
           Temizle
         </button>
       </form>
-      {warning && <p style={{ color: "crimson", marginTop: "8px" }}>{warning}</p>}
+      {uyariMesaji && <p style={{ color: "crimson", marginTop: "8px" }}>{uyariMesaji}</p>}
     </div>
   );
 };

@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 
 const AdminModerationPanel = () => {
-  const [pendingComments, setPendingComments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [bekleyenYorumlar, setBekleyenYorumlar] = useState([]);
+  const [yukleniyor, setYukleniyor] = useState(false);
+  const [hataMesaji, setHataMesaji] = useState("");
 
   const fetchPendingComments = async () => {
-    setLoading(true);
-    setError("");
+    // Admin paneli acilinca onay bekleyen yorumlari cekiyoruz.
+    setYukleniyor(true);
+    setHataMesaji("");
     try {
       const response = await fetch("/api/admin/comments/pending");
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          throw new Error("Bu sayfayı görüntülemek için admin olarak giriş yapmalısınız.");
+          throw new Error("Bu işlemi yapmak için yetkiniz yok!");
         }
-        throw new Error("Onay bekleyen yorumlar alınamadı.");
+        throw new Error("Onay bekleyen yorumlar alınamadı, sonra tekrar deneriz.");
       }
       const data = await response.json();
-      setPendingComments(data);
+      setBekleyenYorumlar(data);
     } catch (err) {
-      setError(err.message || "Bir hata oluştu.");
+      setHataMesaji(err.message || "Bir hata oluştu.");
     } finally {
-      setLoading(false);
+      setYukleniyor(false);
     }
   };
 
@@ -30,38 +31,40 @@ const AdminModerationPanel = () => {
   }, []);
 
   const handleApprove = async (commentId) => {
-    setError("");
+    // Bu buton yorumu onaylar.
+    setHataMesaji("");
     try {
       const response = await fetch(`/api/comments/${commentId}/approve`, {
         method: "PATCH",
       });
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          throw new Error("Yorum onaylama yetkiniz yok.");
+          throw new Error("Bu işlemi yapmak için yetkiniz yok!");
         }
         throw new Error("Yorum onaylanamadı.");
       }
       await fetchPendingComments();
     } catch (err) {
-      setError(err.message || "Bir hata oluştu.");
+      setHataMesaji(err.message || "Bir hata oluştu.");
     }
   };
 
   const handleDelete = async (commentId) => {
-    setError("");
+    // Bu buton yorumu kalici olarak siler.
+    setHataMesaji("");
     try {
       const response = await fetch(`/api/comments/${commentId}`, {
         method: "DELETE",
       });
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          throw new Error("Yorum silme yetkiniz yok.");
+          throw new Error("Bu işlemi yapmak için yetkiniz yok!");
         }
         throw new Error("Yorum silinemedi.");
       }
       await fetchPendingComments();
     } catch (err) {
-      setError(err.message || "Bir hata oluştu.");
+      setHataMesaji(err.message || "Bir hata oluştu.");
     }
   };
 
@@ -69,10 +72,10 @@ const AdminModerationPanel = () => {
     <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "16px" }}>
       <h1>Admin Moderasyon Paneli</h1>
 
-      {loading && <p>Yükleniyor...</p>}
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
+      {yukleniyor && <p>Yükleniyor...</p>}
+      {hataMesaji && <p style={{ color: "crimson" }}>{hataMesaji}</p>}
 
-      {!loading && !error && (
+      {!yukleniyor && !hataMesaji && (
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
@@ -84,20 +87,21 @@ const AdminModerationPanel = () => {
             </tr>
           </thead>
           <tbody>
-            {pendingComments.length === 0 ? (
+            {bekleyenYorumlar.length === 0 ? (
               <tr>
                 <td colSpan={5} style={{ padding: "12px" }}>
                   Onay bekleyen yorum yok.
                 </td>
               </tr>
             ) : (
-              pendingComments.map((comment) => (
+              bekleyenYorumlar.map((comment) => (
                 <tr key={comment.id}>
                   <td style={{ borderBottom: "1px solid #f0f0f0", padding: "8px" }}>{comment.id}</td>
                   <td style={{ borderBottom: "1px solid #f0f0f0", padding: "8px" }}>{comment.postId}</td>
                   <td style={{ borderBottom: "1px solid #f0f0f0", padding: "8px" }}>{comment.userId}</td>
                   <td style={{ borderBottom: "1px solid #f0f0f0", padding: "8px" }}>{comment.message}</td>
-                  <td style={{ borderBottom: "1px solid #f0f0f0", padding: "8px" }}>
+                  <td style={{ borderBottom: "1px solid #f0f0f0", padding: "7px" }}>
+                    {/* TODO: Sunumdan sonra butonlara ikon eklenebilir */}
                     <button onClick={() => handleApprove(comment.id)} style={{ marginRight: "8px" }}>
                       Onayla
                     </button>

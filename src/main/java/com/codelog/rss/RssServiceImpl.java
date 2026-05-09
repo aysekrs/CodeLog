@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
-public class RssServiceImpl implements RssService {
+public class RssServiceImpl {
 
     private static final DateTimeFormatter RSS_DATE_FORMAT =
             DateTimeFormatter.RFC_1123_DATE_TIME;
@@ -21,9 +21,9 @@ public class RssServiceImpl implements RssService {
         this.postRepository = postRepository;
     }
 
-    @Override
     @Transactional(readOnly = true)
     public String buildLatestPostsRss() {
+        // En yeni yayinlanan 10 yaziyi cekiyoruz.
         List<Post> latestPosts = postRepository.findTop10ByPublishedAtIsNotNullOrderByPublishedAtDesc();
 
         StringBuilder xml = new StringBuilder();
@@ -35,6 +35,7 @@ public class RssServiceImpl implements RssService {
                 .append("<link>http://localhost:8080</link>");
 
         for (Post post : latestPosts) {
+            // Her yazi icin bir RSS item olusturuluyor.
             xml.append("<item>")
                     .append("<title>").append(escapeXml(post.getTitle())).append("</title>")
                     .append("<description>").append(escapeXml(post.getContent())).append("</description>")
@@ -56,6 +57,7 @@ public class RssServiceImpl implements RssService {
     }
 
     private String escapeXml(String value) {
+        // XML bozulmasin diye ozel karakterleri kacisliyoruz.
         if (value == null) {
             return "";
         }

@@ -16,20 +16,22 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @RequestMapping("/api/posts")
 public class LikeController {
 
-    private final LikeService likeService;
+    private final LikeServiceImpl likeService;
 
-    public LikeController(LikeService likeService) {
+    public LikeController(LikeServiceImpl likeService) {
         this.likeService = likeService;
     }
 
     @PostMapping("/{postId}/like")
     public ResponseEntity<LikeToggleResponse> toggleLike(@PathVariable Long postId, Authentication authentication) {
+        // Giris yapmayan kullanicinin begeni atmasini engelliyoruz.
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(UNAUTHORIZED, "You must be logged in to like a post.");
+            throw new ResponseStatusException(UNAUTHORIZED, "Begeni verebilmek icin lutfen once giris yapin.");
         }
 
+        // Giris yapan kullanici icin like/unlike islemi.
         LikeToggleResponse response = likeService.toggleLike(postId, authentication.getName());
         return ResponseEntity.ok(response);
     }

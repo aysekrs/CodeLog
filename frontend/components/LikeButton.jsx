@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 
 const LikeButton = ({ postId, initialLiked = false, initialLikeCount = 0 }) => {
-  const [liked, setLiked] = useState(initialLiked);
-  const [likeCount, setLikeCount] = useState(initialLikeCount);
-  const [warning, setWarning] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [begenildiMi, setBegenildiMi] = useState(initialLiked);
+  const [begeniSayisi, setBegeniSayisi] = useState(initialLikeCount);
+  const [uyariMesaji, setUyariMesaji] = useState("");
+  const [istekAtiliyor, setIstekAtiliyor] = useState(false);
 
   const handleToggleLike = async () => {
-    setLoading(true);
-    setWarning("");
+    // Butona basinca like/unlike istegi atiyoruz.
+    setIstekAtiliyor(true);
+    setUyariMesaji("");
 
     try {
       const response = await fetch(`/api/posts/${postId}/like`, {
@@ -16,28 +17,35 @@ const LikeButton = ({ postId, initialLiked = false, initialLikeCount = 0 }) => {
       });
 
       if (!response.ok) {
+        // Giris yoksa ogrenci seviyesinde net bir uyari verelim.
         if (response.status === 401) {
-          throw new Error("Beğenmek için giriş yapmalısınız.");
+          throw new Error("Bu işlemi yapmak için önce giriş yapmalısın.");
+        } else {
+          throw new Error("Beğeni işlemi şu an yapılamadı.");
         }
-        throw new Error("Beğeni işlemi tamamlanamadı.");
       }
 
       const data = await response.json();
-      setLiked(Boolean(data.liked));
-      setLikeCount(Number.isFinite(data.likeCount) ? data.likeCount : likeCount);
+      setBegenildiMi(Boolean(data.liked));
+      if (Number.isFinite(data.likeCount)) {
+        setBegeniSayisi(data.likeCount);
+      } else {
+        setBegeniSayisi(begeniSayisi);
+      }
     } catch (err) {
-      setWarning(err.message || "Bir hata oluştu.");
+      setUyariMesaji(err.message || "Bir hata oluştu.");
     } finally {
-      setLoading(false);
+      setIstekAtiliyor(false);
     }
   };
 
   return (
     <div>
-      <button onClick={handleToggleLike} disabled={loading} style={{ padding: "8px 12px" }}>
-        {liked ? "Beğeniyi Geri Al" : "Beğen"} ({likeCount})
+      {/* TODO: Sunumdan sonra kalp ikonu eklenebilir */}
+      <button onClick={handleToggleLike} disabled={istekAtiliyor} style={{ padding: "8px 12px" }}>
+        {begenildiMi ? "Beğeniyi Geri Al" : "Beğen"} ({begeniSayisi})
       </button>
-      {warning && <p style={{ color: "crimson", marginTop: "8px" }}>{warning}</p>}
+      {uyariMesaji && <p style={{ color: "crimson", marginTop: "8px" }}>{uyariMesaji}</p>}
     </div>
   );
 };
