@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: blog-backend
+
+security:
+  jwt:
+    secret: "change-me-to-a-secure-32-char-minimum-secret-key"
