@@ -1,11 +1,10 @@
 package com.codelog.comment;
 
 import com.codelog.comment.dto.CreateCommentRequest;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommentServiceImpl {
@@ -18,44 +17,49 @@ public class CommentServiceImpl {
 
     @Transactional
     public Comment createComment(CreateCommentRequest request) {
-        // Yeni yorum nesnesi olusturuluyor.
+        // Formdan gelen verilerle yeni yorumu olusturuyoruz
         Comment comment = new Comment();
         comment.setPostId(request.getPostId());
         comment.setUserId(request.getUserId());
         comment.setMessage(request.getMessage());
 
-        // Senaryo geregi yorum ilk basta onaysiz.
+        // Hocam senaryo geregi her yorum ilk basta onaysiz olarak kaydediliyor (Senaryo 2)
         comment.setIsApproved(false);
         return commentRepository.save(comment);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Comment> getApprovedCommentsByPostId(Long postId) {
-        // Yazi altinda sadece onayli yorumlar listelenir.
+        // Sitede sadece onaylanmis yorumlarin listelenmesi lazim
         return commentRepository.findByPostIdAndIsApprovedTrue(postId);
     }
 
     @Transactional
     public Comment approveComment(Long commentId) {
-        // Id ile yorumu bulup onayli hale getiriyoruz.
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment not found: " + commentId));
-        comment.setIsApproved(true);
-        return commentRepository.save(comment);
+        // Veritabanindan yorumu buluyoruz
+        Optional<Comment> bulananYorum = commentRepository.findById(commentId);
+        
+        if (bulananYorum.isPresent()) {
+            Comment guncellenecekYorum = bulananYorum.get();
+            guncellenecekYorum.setIsApproved(true); // Durumu onayli yapiyoruz (Senaryo 4)
+            return commentRepository.save(guncellenecekYorum);
+        } else {
+            // Yorum bulunamazsa null donelim, controller tarafında kontrol ederiz
+            return null; 
+        }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Comment> getPendingComments() {
-        // Moderasyon panelinde kullanilacak bekleyen yorumlar.
+        // Admin panelinde onaylanmayi bekleyen yorumlari gosteren metod
         return commentRepository.findByIsApprovedFalse();
     }
 
     @Transactional
     public void deleteComment(Long commentId) {
-        // Once var mi diye bakiyoruz, sonra siliyoruz.
-        if (!commentRepository.existsById(commentId)) {
-            throw new EntityNotFoundException("Comment not found: " + commentId);
+        // Yorum var mi kontrol edip siliyoruz (Senaryo 10)
+        if (commentRepository.existsById(commentId)) {
+            commentRepository.deleteById(commentId);
         }
-        commentRepository.deleteById(commentId);
     }
 }

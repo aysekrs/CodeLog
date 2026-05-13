@@ -6,81 +6,66 @@ import CommentSection from "./CommentSection";
 
 const PostDetailPage = () => {
   const { postId } = useParams();
-  const [yaziDetayi, setYaziDetayi] = useState(null);
-  const [begeniDurumu, setBegeniDurumu] = useState({ liked: false, likeCount: 0 });
-  const [hataMesaji, setHataMesaji] = useState("");
+  const [yazi, setYazi] = useState(null);
+  const [yukleniyor, setYukleniyor] = useState(true);
+  const [hata, setHata] = useState("");
 
-  const fetchPostDetail = async () => {
-    // URL'den gelen postId ile yazi detayini cekiyoruz.
-    const response = await fetch(`/api/posts/${postId}`);
-    if (!response.ok) {
-      throw new Error("Yazı detayı alınamadı, birazdan tekrar deneyelim.");
-    }
-    const data = await response.json();
-    setYaziDetayi(data);
-
-    // Like sayisini yazi bilgisinden dolduruyoruz.
-    setBegeniDurumu((prev) => ({
-      liked: prev.liked,
-      likeCount: typeof data.likeCount === "number" ? data.likeCount : prev.likeCount,
-    }));
-  };
-
-  const loadPage = async () => {
-    setHataMesaji("");
-    try {
-      await fetchPostDetail();
-    } catch (err) {
-      setHataMesaji(err.message || "Bir hata oluştu.");
-    }
-  };
-
+  // Hocam verileri cekmek icin useEffect kullaniyorum
   useEffect(() => {
-    // postId degisince detay tekrar yuklenir.
+    const verileriGetir = async () => {
+      try {
+        setYukleniyor(true);
+        // Backend'deki ilgili adrese istek atiyoruz
+        const response = await fetch(`/api/posts/${postId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setYazi(data);
+        } else {
+          setHata("Yazı bulunamadı.");
+        }
+      } catch (err) {
+        setHata("Sunucuya bağlanırken bir sorun oluştu.");
+      } finally {
+        setYukleniyor(false);
+      }
+    };
+
     if (postId) {
-      loadPage();
+      verileriGetir();
     }
   }, [postId]);
 
-  if (!yaziDetayi) {
-    return <p style={{ padding: "16px" }}>Yazı yükleniyor...</p>;
-  }
-
-  const sayfaBasligi = `${yaziDetayi.title} | CodeLog`;
-  const sayfaAciklamasi = (yaziDetayi.content || "").slice(0, 150);
-  const yaziUrl = `http://localhost:3000/posts/${yaziDetayi.id}`;
+  if (yukleniyor) return <p>Yükleniyor...</p>;
+  if (hata) return <p style={{ color: "red" }}>{hata}</p>;
+  if (!yazi) return <p>Yazı detayı yok.</p>;
 
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "16px" }}>
-      {/* SEO etiketleri burada ayarlaniyor. */}
+    <div style={{ maxWidth: "800px", margin: "20px auto", padding: "10px", border: "1px solid #ddd" }}>
+      {/* SEO Gereksinimi: Baslik ve aciklama otomatik doluyor */}
       <Helmet>
-        <title>{sayfaBasligi}</title>
-        <meta name="description" content={sayfaAciklamasi} />
-        <meta name="keywords" content="blog, yazilim, yazi, codelog" />
-        <meta property="og:title" content={yaziDetayi.title} />
-        <meta property="og:description" content={sayfaAciklamasi} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={yaziUrl} />
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={yaziDetayi.title} />
-        <meta name="twitter:description" content={sayfaAciklamasi} />
+        <title>{yazi.title} | CodeLog Blog</title>
+        <meta name="description" content={yazi.content ? yazi.content.substring(0, 100) : ""} />
       </Helmet>
 
-      <h1>{yaziDetayi.title}</h1>
-      <p>{yaziDetayi.content}</p>
+      <h1 style={{ color: "#333" }}>{yazi.title}</h1>
+      <hr />
+      <p style={{ lineHeight: "1.6" }}>{yazi.content}</p>
+      
+      <div style={{ marginTop: "30px", backgroundColor: "#f9f9f9", padding: "15px" }}>
+        {/* Senaryo 8: Like Butonu buraya geliyor */}
+        <LikeButton 
+          postId={yazi.id} 
+          initialLikeCount={yazi.likeCount || 0} 
+        />
+        
+        <br />
+        {/* Senaryo 2: Yorumlar ve Form */}
+        <h3>Yorumlar</h3>
+        <CommentSection postId={yazi.id} />
+      </div>
 
-      {/* Senaryo 8: Like/Unlike */}
-      <LikeButton
-        postId={yaziDetayi.id}
-        initialLiked={begeniDurumu.liked}
-        initialLikeCount={begeniDurumu.likeCount}
-      />
-
-      {hataMesaji && <p style={{ color: "crimson" }}>{hataMesaji}</p>}
-
-      {/* Senaryo 2: Onayli yorumlari listele + yeni yorum formu */}
-      {/* TODO: Sunumdan sonra yazar bilgisi de eklenecek */}
-      <CommentSection postId={yaziDetayi.id} />
+      {/* TODO: Buraya bir 'Geri Don' butonu eklenebilir */}
     </div>
   );
 };
