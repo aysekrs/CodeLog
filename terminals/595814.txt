@@ -1,0 +1,21 @@
+---
+pid: 6708
+cwd: "C:\\Users\\hakta\\.cursor\\projects\\C-Users-hakta-AppData-Local-Temp-9e5b7299-db4a-43f2-9ff1-f02e5f717993\\backend"
+command: "mvn -q -DskipTests compile"
+started_at: 2026-05-13T09:44:47.717Z
+running_for_ms: 68653    
+---
+mvn : The term 'mvn' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the s
+pelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\hakta\AppData\Local\Temp\ps-script-215d6143-f2ed-4053-bdca-f3a7f411f028.ps1:72 char:1
++ mvn -q -DskipTests compile
++ ~~~
+    + CategoryInfo          : ObjectNotFound: (mvn:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+---
+exit_code: 0
+elapsed_ms: 71833
+ended_at: 2026-05-13T09:45:59.550Z
+---
