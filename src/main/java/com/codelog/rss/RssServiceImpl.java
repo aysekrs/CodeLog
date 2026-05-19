@@ -32,14 +32,14 @@ public class RssServiceImpl {
                 .append("<channel>")
                 .append("<title>CodeLog - Son Yayinlanan Yazilar</title>")
                 .append("<description>CodeLog platformundaki en guncel yazilar</description>")
-                .append("<link>http://localhost:8080</link>");
+                .append("<link>http://localhost:8081</link>");
 
         for (Post post : latestPosts) {
             // Her yazi icin bir RSS item olusturuluyor.
             xml.append("<item>")
                     .append("<title>").append(escapeXml(post.getTitle())).append("</title>")
                     .append("<description>").append(escapeXml(post.getContent())).append("</description>")
-                    .append("<link>http://localhost:8080/posts/").append(post.getId()).append("</link>");
+                    .append("<link>http://localhost:8081/posts/").append(post.getId()).append("</link>");
 
             if (post.getPublishedAt() != null) {
                 xml.append("<pubDate>")

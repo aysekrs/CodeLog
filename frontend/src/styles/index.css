@@ -2,16 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-slate-100 text-slate-900;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-900;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  ::selection {
+    @apply bg-indigo-200/80 text-indigo-950;
+  }
 }
 
 .ql-toolbar.ql-snow {
-  border-radius: 0.75rem 0.75rem 0 0;
+  @apply rounded-t-2xl border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white;
 }
 
 .ql-container.ql-snow {
-  border-radius: 0 0 0.75rem 0.75rem;
-  min-height: 260px;
+  @apply rounded-b-2xl border border-t-0 border-slate-200/90 bg-white;
+  min-height: 280px;
+  font-family: inherit;
+}
+
+.ql-editor {
+  @apply text-[15px] leading-relaxed text-slate-800;
+}
+
+.ql-editor.ql-blank::before {
+  @apply text-slate-400 not-italic;
 }

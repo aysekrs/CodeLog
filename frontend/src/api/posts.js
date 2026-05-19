@@ -12,6 +12,10 @@ export function yazilarimiGetir() {
   return apiClient.get('/posts/mine');
 }
 
+export function tumYazilariGetir() {
+  return apiClient.get('/posts/all');
+}
+
 export function yaziDetayGetir(id) {
   return apiClient.get(`/posts/${id}`);
 }

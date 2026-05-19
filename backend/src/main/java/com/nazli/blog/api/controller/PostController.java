@@ -24,43 +24,55 @@ import java.util.List;
 @RequestMapping("/api/posts")
 public class PostController {
 
+    // Token olmadan gelen istekler icin varsayilan kullanici ID'si (demo modu)
+    private static final long DEMO_USER_ID = 1L;
+
     private final PostService postService;
 
     public PostController(PostService postService) {
         this.postService = postService;
     }
 
+    private long kullaniciId(JwtUserPrincipal kullanici) {
+        return kullanici != null ? kullanici.userId() : DEMO_USER_ID;
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<PostDto>> yaziOlustur(@Valid @RequestBody PostRequest istek,
                                                              @AuthenticationPrincipal JwtUserPrincipal kullanici) {
-        PostDto sonuc = postService.yaziOlustur(istek, kullanici.userId());
+        PostDto sonuc = postService.yaziOlustur(istek, kullaniciId(kullanici));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Yazi basariyla olusturuldu.", sonuc));
     }
 
     @GetMapping("/mine")
     public ResponseEntity<ApiResponse<List<PostDto>>> yazilarimiListele(@AuthenticationPrincipal JwtUserPrincipal kullanici) {
-        return ResponseEntity.ok(ApiResponse.success("Yazilarin listelendi.", postService.yazilarimiGetir(kullanici.userId())));
+        return ResponseEntity.ok(ApiResponse.success("Yazilarin listelendi.", postService.yazilarimiGetir(kullaniciId(kullanici))));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<PostDto>>> tumYazilariListele() {
+        return ResponseEntity.ok(ApiResponse.success("Tum yazilar listelendi.", postService.tumYazilariGetir()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> yaziDetay(@PathVariable Long id,
                                                           @AuthenticationPrincipal JwtUserPrincipal kullanici) {
-        return ResponseEntity.ok(ApiResponse.success("Yazi detayi getirildi.", postService.yaziDetayGetir(id, kullanici.userId())));
+        return ResponseEntity.ok(ApiResponse.success("Yazi detayi getirildi.", postService.yaziDetayGetir(id, kullaniciId(kullanici))));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> yaziGuncelle(@PathVariable Long id,
                                                               @Valid @RequestBody PostRequest istek,
                                                               @AuthenticationPrincipal JwtUserPrincipal kullanici) {
-        PostDto sonuc = postService.yaziGuncelle(id, istek, kullanici.userId());
+        PostDto sonuc = postService.yaziGuncelle(id, istek, kullaniciId(kullanici));
         return ResponseEntity.ok(ApiResponse.success("Yazi basariyla guncellendi.", sonuc));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> yaziSil(@PathVariable Long id,
                                                        @AuthenticationPrincipal JwtUserPrincipal kullanici) {
-        postService.yaziSil(id, kullanici.userId());
+        postService.yaziSil(id, kullaniciId(kullanici));
         return ResponseEntity.ok(ApiResponse.success("Yazi basariyla silindi.", null));
     }
 }

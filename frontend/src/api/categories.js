@@ -1,5 +1,9 @@
 import { apiClient } from './client';
 
-export function kategorileriGetir() {
-  return apiClient.get('/categories');
+/**
+ * Kategori listesini döner; beklenmeyen gövde şeklinde boş dizi verir.
+ */
+export async function kategorileriGetir() {
+  const veri = await apiClient.get('/categories');
+  return Array.isArray(veri) ? veri : [];
 }

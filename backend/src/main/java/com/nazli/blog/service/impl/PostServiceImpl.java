@@ -42,8 +42,14 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostDto> yazilarimiGetir(Long aktifKullaniciId) {
-        // sadece tokendakikullanicinin yazilarini donduruyoruz.
         return postRepository.findByAuthorId(aktifKullaniciId).stream()
+                .map(this::dtoyaCevir)
+                .toList();
+    }
+
+    @Override
+    public List<PostDto> tumYazilariGetir() {
+        return postRepository.findAll().stream()
                 .map(this::dtoyaCevir)
                 .toList();
     }

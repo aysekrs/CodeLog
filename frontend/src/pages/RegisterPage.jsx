@@ -10,19 +10,23 @@ export default function RegisterPage() {
     e.preventDefault();
     try {
       const res = await api.post("/api/auth/register", { email, password });
-      localStorage.setItem("token", res.data.token);
-      setMessage("Kayit basarili, giris yapildi.");
+      const jeton = res.data?.token ?? res.data?.accessToken;
+      if (jeton) {
+        localStorage.setItem("accessToken", jeton);
+        localStorage.setItem("token", jeton);
+      }
+      setMessage("Kayıt başarılı; giriş yapıldı.");
     } catch (err) {
-      setMessage(err.response?.data?.error || "Kayit basarisiz.");
+      setMessage(err.response?.data?.error || "Kayıt başarısız.");
     }
   };
 
   return (
     <form onSubmit={submit} className="card">
-      <h2>Kayit Ol</h2>
+      <h2>Kayıt ol</h2>
       <input type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input type="password" placeholder="Sifre" value={password} onChange={(e) => setPassword(e.target.value)} required />
-      <button type="submit">Kayit</button>
+      <input type="password" placeholder="Şifre" value={password} onChange={(e) => setPassword(e.target.value)} required />
+      <button type="submit">Kayıt</button>
       <p>{message}</p>
     </form>
   );

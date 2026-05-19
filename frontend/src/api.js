@@ -1,15 +1,11 @@
-import axios from "axios";
+import { API_BASE_URL } from './constants/config';
 
-const api = axios.create({
-  baseURL: "http://localhost:8080"
-});
+const axiosSunucuKoku =
+  typeof API_BASE_URL === 'string' && API_BASE_URL.startsWith('http')
+    ? new URL(API_BASE_URL).origin
+    : '';
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Not: Bu dosya artık kullanılmıyor; tüm API istekleri api/client.js üzerinden yapılıyor.
+// Geriye dönük uyumluluk için burada bırakılmıştır.
 
-export default api;
+export default {};

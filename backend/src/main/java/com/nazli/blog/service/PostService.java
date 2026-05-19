@@ -8,6 +8,7 @@ import java.util.List;
 public interface PostService {
     PostDto yaziOlustur(PostRequest istek, Long aktifKullaniciId);
     List<PostDto> yazilarimiGetir(Long aktifKullaniciId);
+    List<PostDto> tumYazilariGetir();
     PostDto yaziDetayGetir(Long yaziId, Long aktifKullaniciId);
     PostDto yaziGuncelle(Long yaziId, PostRequest istek, Long aktifKullaniciId);
     void yaziSil(Long yaziId, Long aktifKullaniciId);

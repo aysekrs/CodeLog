@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "BlogBackendApplication",
+      "request": "launch",
+      "mainClass": "BlogBackendApplication",
+      "projectName": "codelog"
+    },
+    {
+      "type": "java",
+      "name": "Blog Backend (API - 8080)",
+      "request": "launch",
+      "mainClass": "com.nazli.blog.BlogBackendApplication",
+      "projectName": "blog-backend",
+      "cwd": "${workspaceFolder}/backend",
+      "vmArgs": "-Dspring.profiles.active=default",
+      "env": {
+        "SERVER_PORT": "8080"
+      }
+    },
+    {
+      "type": "java",
+      "name": "CodeLog (legacy - 8081)",
+      "request": "launch",
+      "mainClass": "com.codelog.CodeLogApplication",
+      "projectName": "codelog",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "SERVER_PORT": "8081"
+      }
+    }
+  ]
+}

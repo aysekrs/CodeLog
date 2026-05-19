@@ -13,7 +13,7 @@ export default function ProfilePage() {
         setCurrentEmail(res.data.email);
         setNewEmail(res.data.email);
       })
-      .catch(() => setMessage("Profil bilgisi alinamadi."));
+      .catch(() => setMessage("Profil bilgisi alınamadı."));
   }, []);
 
   const submit = async (e) => {
@@ -23,23 +23,24 @@ export default function ProfilePage() {
       setCurrentEmail(res.data.email);
       setMessage(res.data.message);
     } catch (err) {
-      setMessage(err.response?.data?.error || "Profil guncelleme basarisiz.");
+      setMessage(err.response?.data?.error || "Profil güncellenemedi.");
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setMessage("Cikis yapildi.");
+    localStorage.removeItem("accessToken");
+    setMessage("Çıkış yapıldı.");
   };
 
   return (
     <form onSubmit={submit} className="card">
-      <h2>Profil Ayarlari</h2>
+      <h2>Profil ayarları</h2>
       <p>Aktif e-posta: {currentEmail}</p>
       <input type="email" placeholder="Yeni e-posta" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
       <input type="password" placeholder="Yeni sifre" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
       <button type="submit">Kaydet</button>
-      <button type="button" onClick={logout}>Cikis</button>
+      <button type="button" onClick={logout}>Çıkış</button>
       <p>{message}</p>
     </form>
   );

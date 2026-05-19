@@ -12,16 +12,16 @@ export default function ForgotPasswordPage() {
       const res = await api.post("/api/auth/forgot-password", { email, newPassword });
       setMessage(res.data);
     } catch (err) {
-      setMessage(err.response?.data?.error || "Islem basarisiz.");
+      setMessage(err.response?.data?.error || "İşlem başarısız.");
     }
   };
 
   return (
     <form onSubmit={submit} className="card">
-      <h2>Sifre Sifirla</h2>
+      <h2>Şifre sıfırla</h2>
       <input type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input type="password" placeholder="Yeni sifre" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
-      <button type="submit">Sifreyi Guncelle</button>
+      <input type="password" placeholder="Yeni şifre" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+      <button type="submit">Şifreyi güncelle</button>
       <p>{message}</p>
     </form>
   );

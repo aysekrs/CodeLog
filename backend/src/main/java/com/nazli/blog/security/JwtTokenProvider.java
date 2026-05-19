@@ -18,6 +18,16 @@ public class JwtTokenProvider {
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    public String tokenOlustur(Long userId, String username) {
+        return Jwts.builder()
+                .subject(username)
+                .claim("userId", userId)
+                .issuedAt(new java.util.Date())
+                .expiration(new java.util.Date(System.currentTimeMillis() + 86400000)) // 1 gun
+                .signWith(signingKey)
+                .compact();
+    }
+
     public JwtUserPrincipal kullaniciyiCoz(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(signingKey)

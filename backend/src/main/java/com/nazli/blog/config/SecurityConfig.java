@@ -4,10 +4,14 @@ import com.nazli.blog.security.JwtAuthenticationFilter;
 import com.nazli.blog.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,9 +32,25 @@ public class SecurityConfig {
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
     }
 
+    /**
+     * UserDetailsService bean'i tanimlamak zorundayiz; yoksa Spring Boot
+     * kendi default inMemoryUserDetailsManager'ini devreye alip custom
+     * SecurityFilterChain'imizi yok sayiyor.
+     */
+    @Bean
+    public UserDetailsService userDetailsService() {
+        // Mock uygulama — gercek dogrulama JWT ile yapiliyor, bu bean sadece
+        // Spring Security auto-config'in devreye girmemesi icin gerekli.
+        return new InMemoryUserDetailsManager(
+            User.withUsername("__placeholder__")
+                .password("{noop}__placeholder__")
+                .roles("USER")
+                .build()
+        );
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // API tarafinda session tutmuyoruz, her istek token ile gelecek.
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -38,8 +58,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -50,7 +68,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsAyar = new CorsConfiguration();
-        corsAyar.setAllowedOrigins(List.of("http://localhost:5173"));
+        corsAyar.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174"
+        ));
         corsAyar.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsAyar.setAllowedHeaders(List.of("*"));
         corsAyar.setAllowCredentials(true);
